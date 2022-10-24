@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClosetItemApp.Maui.MainPage"
+             xmlns:model="clr-namespace:ClosetItemApp.Maui.Models"
+             xmlns:viewmodel="clr-namespace:ClosetItemApp.Maui.ViewModels"
+             x:DataType="viewmodel:ClosetItemListViewModel"
+             Title="{Binding Title}">
+
+    <Grid ColumnSpacing="1" RowSpacing="1" Padding="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <VerticalStackLayout Padding="5" Grid.Row="0" Margin="9">
+            <Entry x:Name="ShortName" Placeholder="Enter Short Name" Text="{Binding ShortName}" />
+            <Entry x:Name="ItemType" Placeholder="Enter Item Type" Text="{Binding ItemType}"/>
+            <Entry x:Name="Color" Placeholder="Enter Color" Text="{Binding Color}"/>
+        </VerticalStackLayout>
+
+
+        <Button Text="{Binding AddEditButtonText}" Grid.Row="1" IsEnabled="{Binding IsNotLoading}"
+                Command="{Binding SaveClosetItemCommand}" Margin="9" />
+
+        <Button Text="Clear Form" Command="{Binding GetClosetItemListCommand}" IsEnabled="{Binding IsNotLoading}" 
+                Grid.Row="2" Margin="9"/>
+
+        <RefreshView Grid.Row="4"
+                     Command="{Binding GetClosetItemListCommand}" 
+                     IsRefreshing="{Binding IsRefreshing}">
+            <CollectionView ItemsSource="{Binding ClosetItems}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:ClosetItem">
+                        <Grid Padding="10" ColumnDefinitions="*, auto">
+                            <Frame HeightRequest="70" Grid.Column="0">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:ClosetItemListViewModel}}, Path=GetClosetItemDetailsCommand }" 
+                                                          CommandParameter="{Binding Id}" />
+                                </Frame.GestureRecognizers>
+                                <HorizontalStackLayout Padding="5" Spacing="5">
+                                    <Label Text="{Binding ShortName}"></Label>
+                                    <Label Text="{Binding ItemType}"></Label>
+                                </HorizontalStackLayout>
+                            </Frame>
+                            <HorizontalStackLayout Grid.Column="1">
+                                <Button Text="Update" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:ClosetItemListViewModel}}, Path=SetEditModeCommand}" 
+                                                          CommandParameter="{Binding Id}" Margin="9"/>
+                                <Button Text="Delete" Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:ClosetItemListViewModel}}, Path=DeleteClosetItemCommand }" 
+                                                          CommandParameter="{Binding Id}" Margin="9"/>
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+    <!--<Grid ColumnDefinitions="*,*" ColumnSpacing="5" RowDefinitions="*, Auto">
+        <RefreshView Grid.ColumnSpan="2" 
+                     Command="{Binding GetClosetItemListCommand}" 
+                     IsRefreshing="{Binding IsRefreshing}">
+            <CollectionView ItemsSource="{Binding ClosetItems}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:ClosetItem">
+                        <Grid Padding="10">
+                            <Frame HeightRequest="90">
+                                <Frame.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:ClosetItemListViewModel}}, Path=GetClosetItemDetailsCommand }" 
+                                                          CommandParameter="{Binding .}" />
+                                </Frame.GestureRecognizers>
+                                <HorizontalStackLayout Padding="10" Spacing="5">
+                                    <Label Text="{Binding Make}"></Label>
+                                    <Label Text="{Binding Model}"></Label>
+                                </HorizontalStackLayout>
+                            </Frame>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+        
+        <Button Text="Fetch ClosetItems" Command="{Binding GetClosetItemListCommand}" IsEnabled="{Binding IsNotLoading}" 
+                Grid.Row="1" Grid.Column="0" Margin="9"/>
+    </Grid>-->
+</ContentPage>
