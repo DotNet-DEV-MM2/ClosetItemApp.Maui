@@ -25,10 +25,14 @@ public static class MauiProgram
 		builder.Services.AddTransient<ClosetItemApiService>();
 
 		builder.Services.AddSingleton<ClosetItemListViewModel>();
-		builder.Services.AddTransient<ClosetItemDetailsViewModel>();
+        builder.Services.AddSingleton<LoadingPageViewModel>();
+        builder.Services.AddSingleton<LoginPageViewModel>();
+        builder.Services.AddTransient<ClosetItemDetailsViewModel>();
 
 		builder.Services.AddSingleton<MainPage>();
-		builder.Services.AddTransient<ClosetItemDetailsPage>();
+        builder.Services.AddSingleton<LoadingPage>();
+        builder.Services.AddSingleton<LoginPage>();
+        builder.Services.AddTransient<ClosetItemDetailsPage>();
 
 		return builder.Build();
 	}

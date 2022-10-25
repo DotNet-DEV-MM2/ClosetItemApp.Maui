@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace ClosetItemApp.Api
 {
-    public class ClosetItemListDbContext : DbContext
+    public class ClosetItemListDbContext : IdentityDbContext
     {
         public ClosetItemListDbContext(DbContextOptions<ClosetItemListDbContext> options) : base(options)
         {
@@ -13,6 +14,8 @@ namespace ClosetItemApp.Api
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<ClosetItem>().HasData(
                  new ClosetItem
                  {
