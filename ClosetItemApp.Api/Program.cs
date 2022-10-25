@@ -1,7 +1,11 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System.Text;
 
 namespace ClosetItemApp.Api
 {
@@ -29,10 +33,38 @@ namespace ClosetItemApp.Api
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ClosetItemListDbContext>();
 
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = builder.Configuration["JwtSettings:Audience"],
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]))
+                };
+            });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser()
+                .Build();
+            });
+
+
             builder.Host.UseSerilog((ctx, lc) =>
                 lc.WriteTo.Console()
                 .ReadFrom.Configuration(ctx.Configuration));
 
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -41,9 +73,13 @@ namespace ClosetItemApp.Api
             app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseCors("AllowAll");
 
-            app.UseAuthorization();
+            
 
             app.MapGet("/closetItems", async (ClosetItemListDbContext db) => await db.ClosetItems.ToListAsync());
 
@@ -113,7 +149,7 @@ namespace ClosetItemApp.Api
                 };
 
                 return Results.Ok(response);
-            });
+            }).AllowAnonymous();
 
 
             app.Run();
