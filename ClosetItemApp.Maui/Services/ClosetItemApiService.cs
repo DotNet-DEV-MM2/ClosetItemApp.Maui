@@ -1,15 +1,10 @@
 ﻿using ClosetItemApp.Maui.Models;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClosetItemApp.Maui.Services
 {
-   
+
     public class ClosetItemApiService
     {
          HttpClient _httpClient;
@@ -25,7 +20,8 @@ namespace ClosetItemApp.Maui.Services
         {
             try
             {
-                var response = await _httpClient.GetStringAsync("/closetItems");
+                await SetAuthToken();
+                var response = await _httpClient.GetStringAsync("/closetitems");
                 return JsonConvert.DeserializeObject<List<ClosetItem>>(response);
             }
             catch (Exception ex)
@@ -92,6 +88,29 @@ namespace ClosetItemApp.Maui.Services
             {
                 StatusMessage = "Failed to update data.";
             }
+        }
+
+        public async Task<AuthResponseModel> Login(LoginModel loginModel)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("/login", loginModel);
+                response.EnsureSuccessStatusCode();
+                StatusMessage = "Login Successful";
+
+                return JsonConvert.DeserializeObject<AuthResponseModel>(await response.Content.ReadAsStringAsync());
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = "Failed to login successfully.";
+                return new AuthResponseModel();
+            }
+        }
+
+        public async Task SetAuthToken()
+        {
+            var token = await SecureStorage.GetAsync("Token");
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         }
     }
 }

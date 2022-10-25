@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,10 +24,25 @@ namespace ClosetItemApp.Maui.ViewModels
             {
                 await GoToLoginPage();
             }
+            else
+            {
+                var jsonToken = new JwtSecurityTokenHandler().ReadToken(token) as JwtSecurityToken;
 
-            // Evaluate token and decide if valid
+                if (jsonToken.ValidTo < DateTime.UtcNow)
+                {
+                    SecureStorage.Remove("Token");
+                    await GoToLoginPage();
+                }
+                else
+                {
+                    await GoToMainPage();
+                }
+            }
+        }
 
-
+        private async Task GoToMainPage()
+        {
+            await Shell.Current.GoToAsync($"{nameof(MainPage)}");
         }
 
         private async Task GoToLoginPage()
